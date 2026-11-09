@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 import java.util.Properties
 
 plugins {
@@ -14,8 +15,8 @@ android {
         applicationId = "com.gululu.aamediamate"
         minSdk = 29
         targetSdk = 36
-        versionCode = 19
-        versionName = "1.4.5"
+        versionCode = 22
+        versionName = "1.4.8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -50,7 +51,6 @@ android {
         }
         debug {
             applicationIdSuffix = ".dev"
-            versionNameSuffix = "-dev"
             if (hasSigning) {
                 signingConfig = signingConfigs.getByName("release")
             }
@@ -84,6 +84,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation("androidx.media:media:1.6.0")
+    implementation("androidx.car.app:app:1.7.0")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

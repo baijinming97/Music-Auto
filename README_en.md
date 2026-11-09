@@ -1,152 +1,69 @@
-# AAMediaMate
+# Music Auto
 
-<div align="center">
-    <img alt="LOGO" src="app\src\main\res\drawable\app_icon.png" width="200" height="200" />
-</div>
+[中文](README.md) · [Download 1.4.8 prerelease](https://github.com/baijinming97/Music-Auto/releases/tag/v1.4.8) · [Upstream AAMediaMate](https://github.com/gululu1235/AAMediaMate)
 
-**AAMediaMate (Android Auto Media Mate)** is a media bridge tool designed for Android Auto. It syncs the currently playing music information from your phone to your car screen, supports basic playback controls, and offers optional lyrics display.
+Music Auto is a community fork of **gululu1235/AAMediaMate**, maintained by baijinming97. It improves Spotify bridging, resuming playback after an Android Auto connection, and compact two-row lyrics. Spotify plays the audio; Music Auto supplies the car-facing media session and optional lyrics.
 
-This app and its README were written with the help of ChatGPT, and the logo was generated using Gemini.
----
-It's official now -- AAMediaMate is public available in [Google Play](https://play.google.com/store/apps/details?id=com.gululu.aamediamate&pcampaignid=web_share). Enjoy :)
----
+**1.4.8 is a prerelease.** Playback resumption and two-row lyrics have been tested in a car. Automatic selection of Music Auto remains device-dependent: earlier reconnects selected native Spotify, while the latest user report showed blue Music Auto, lyrics, and normal audio from startup. Consistency across reconnects and other devices is not established.
 
-## 📱 Features
+This fork retains the upstream Apache-2.0 license and attribution. It is not an official upstream, Spotify, or Google release.
 
-- 🛰️ **Bridge Music Apps** that do *not* natively support Android Auto (e.g., QQ Music, NetEase Cloud Music)
-- ⏯️ **Basic Controls**: Play, Pause, Next, Previous
-- 🎤 **Optional Lyrics Display**, shown as song title scroll text on Android Auto
-- 📱 **Phone Interface** for managing lyrics cache and settings
+## Changes
 
----
+- Default-on Spotify source lock overrides the general native-AA-app filter while respecting per-app control opt-outs. Disable it to bridge other players.
+- Metadata and controls follow the same source session; bridge installations cannot become sources themselves.
+- A playable Spotify entry remains available without an active session. Startup can be requested through its exported media-button receiver.
+- After AA connects and the bridge is ready, playback resumes once by default. Already-playing sources are skipped; manual transport requests cancel pending resumption. The setting can be disabled.
+- The notification listener and browser service share session ownership across browser teardown.
+- Long lyrics use both text rows; longer lines pause before timed static page changes. The option can be disabled.
+- Notification access is checked for the exact listener, and the phone UI displays the installed version.
 
-## ⚠️ Usage & Limitations
+See [CHANGELOG](CHANGELOG.md) and [validation scope](docs/VALIDATION.md).
 
-- This app is primarily designed to **bridge music apps that don't support Android Auto**, such as Youtube, QQ Music, NetEase Cloud Music.  
-  It can still work with apps that already support Android Auto (e.g., YouTube Music) by disabling "Ignore Native Android Auto Players" in settings.
+## Installation
 
-- The app uses notification listeners and media session APIs to extract playback info. Please make sure the necessary permissions are granted, or the app will not work properly.
-- **Enable Unkown source for Android Auto is required if you use APK to install this app**
----
-## How to Enable Unknown Sources in Android Auto
+1. Download `Music-Auto-1.4.8.apk` from this fork's [Releases](https://github.com/baijinming97/Music-Auto/releases). Android 10+ and an AA-compatible head unit are required.
+2. Keep Spotify installed, sign in, and verify playback. Music Auto supplies no account, music files, or subscription.
+3. Open Music Auto and grant notification access to this installation. Source lock and connection auto-resume are enabled by default.
+4. If the app is missing in AA, tap the AA version entry ten times to enable developer settings, enable **Unknown sources**, and reconnect.
+5. Select Music Auto on the head unit. Read and accept its lyrics notice if enabling lyrics and configure a provider. View lyrics only while parked or as a passenger.
+6. If the phone restricts background operation, allow unrestricted background use and autostart for Music Auto where available.
 
-To use apps outside the official Play Store in Android Auto (for example, a custom media bridge app), you need to enable **Unknown Sources** first. Follow the steps below:
+The APK is the same file used in the local car tests: a **debuggable debug build**, package `com.gululu.aamediamate.dev`, versionName `1.4.8`, versionCode `22`, signed with a separate Android Debug certificate. It can coexist with upstream AAMediaMate. It includes no personal lyrics library, backups, accounts, API keys, or device logs.
 
----
+Updates with the same signing certificate can preserve data. A build with the same package name but a different certificate cannot be installed over it: export a backup before considering removal. Locally compiled debug APKs may also use a different signing key.
 
-### 1. Enable Developer Mode
-1. Open the **Android Auto app** (search for "Android Auto" in your phone settings).
-2. Scroll to the bottom and find the **Version** section.
-3. Tap the **Version number 10 times** until you see the message **“Developer mode enabled”**.
+## Lyrics and backup
 
----
+Upstream LRCLib, Spotify via RapidAPI, and LrcApi support is retained. LRCLib needs no API key; supply your own credentials or endpoint for other providers when required. Availability depends on the song and provider.
 
-### 2. Enter Developer Settings
-1. Go back to the **Android Auto settings** main screen.
-2. Tap the **three-dot menu (⋮) → Developer settings**.
+The compact layout estimates about 12 CJK characters per row and was tested on one 800-pixel-wide display. Other displays, fonts, or languages may truncate text. The current line's continuation takes priority over next-line preview or song details. The two-row option can be disabled in display settings.
 
----
+Use in-app export/import to migrate existing lyrics and settings. Do not attach credential-bearing configuration, full backups, or unreviewed device logs to public reports.
 
-### 3. Turn on Unknown Sources
-1. In Developer settings, find the option **“Unknown sources”**.
-2. Toggle it **ON**.
-3. Restart the Android Auto app.
+## Limitations
 
----
+- **Source lock does not pin the AA-selected player.** This build neither takes permanent audio focus nor blocks Spotify's focus requests. More repeated starts and devices are needed to validate automatic UI selection.
+- AA owns the Maps media strip and may collapse text into transport buttons. Persistent lyrics there are not guaranteed.
+- Bluetooth auto-resume, AA autoplay, and OEM battery restrictions can affect startup order. Disabling AA autoplay alone did not guarantee MA selection. Spotify's similar-content autoplay is separate from connection resumption.
+- A zero-PCM experiment exists only in explicitly opted-in instrumentation. **The published app does not run it.** It changed the system media-button target once but did not establish AA UI takeover.
 
-## ⚠️ Safety Notice
+## Build
 
-🚗 **Do NOT use the lyrics display feature while driving.**  
-Please use it only when parked or as a passenger to ensure road safety.
+Use JDK 17, Android SDK Platform 36, and the checked-in Gradle Wrapper. Configure `ANDROID_HOME` or the SDK path in local `local.properties`, then run:
 
----
-
-## ⚙️ Lyrics Configuration
-
-AAMediaMate supports three lyrics sources. You can enable, disable, and reorder them in the app settings.
-
-### 1️⃣ LRCLib (Default)
-
-A free, open-source synced lyrics database. No configuration required — recommended as the default.
-
----
-
-### 2️⃣ Spotify (via [RapidAPI](https://rapidapi.com/nguyenmanhict-MuTUtGWD7K/api/spotify-web-api3))
-
-**Setup Instructions:**
-
-1. Visit the [RapidAPI Page](https://rapidapi.com/nguyenmanhict-MuTUtGWD7K/api/spotify-web-api3)
-2. Register or log in to your RapidAPI account
-3. Copy your `X-RapidAPI-Key`
-4. Paste it into the Spotify provider settings in AAMediaMate
-
-**Note:** Free quota is limited.
-
----
-
-### 3️⃣ [LrcApi](https://github.com/HisAtri/LrcApi/blob/main/README_EN.md)
-
-A community-provided open-source lyrics API with good Chinese lyrics support.
-No API key required, but you need to manually configure the API URL. See the [LrcApi docs](https://github.com/HisAtri/LrcApi/blob/main/README_EN.md#public-api) for public API endpoints or self-hosting instructions.
-
-For self-hosted instances with authorization enabled, set the **Authorization Token** field in the provider settings. The token is sent as-is in the `Authorization` HTTP header:
-```
-Authorization: <your-token>
+```sh
+./gradlew assembleDebug testDebugUnitTest lintDebug --max-workers=1
 ```
 
----
+On Windows use `gradlew.bat`. Output is `app/build/outputs/apk/debug/app-debug.apk`. Private signing keys are excluded. CI builds and checks source; it does not automatically publish update-compatible signed APKs.
 
-## 🛠️ How to Use
+This prerelease uses the `debug` variant. The inherited `release` variant still uses the upstream base application ID and is not a direct upgrade path for this APK. Device tests are opt-in and must be run while parked; see [testing](docs/VALIDATION.md).
 
-1. Download the APK from the [Releases Page](https://github.com/gululu1235/AAMediaMate/releases)
-2. Grant notification listener permission (you will be prompted on first launch)
-3. Open the app on your phone to view current playback information
-4. On Android Auto, select AAMediaMate as the media source
-5. Play music in any supported app — AAMediaMate will automatically sync metadata and cover art
+## Attribution and contributions
 
----
+Report issues in [this fork](https://github.com/baijinming97/Music-Auto/issues), including relevant versions, display mode, and expected/actual behavior after removing sensitive information.
 
-## 📂 Download APK
+Thanks to [gululu1235/AAMediaMate](https://github.com/gululu1235/AAMediaMate) and its contributors for the bridge, lyrics, backup, and settings implementation. Upstream history is preserved in Git. This fork was implemented and tested with ChatGPT/Codex assistance.
 
-Go to the [Releases Page](https://github.com/gululu1235/AAMediaMate/releases) to download the latest APK.  
-(Browser recommended. Please ensure “Install from unknown sources” is enabled in your device settings.)
-
----
-
-## 📄 License
-
-This project is open-sourced under the [Apache License 2.0](LICENSE). Contributions and forks are welcome!
-
----
-
-## 🙏 Acknowledgments
-
-- [ChatGPT](https://chatgpt.com/)
-- [Gemini](https://gemini.google.com/app)
-- [Spotify Lyrics via RapidAPI](https://rapidapi.com/nguyenmanhict-MuTUtGWD7K/api/spotify-web-api3)
-- [LrcApi by @HisAtri](https://github.com/HisAtri/LrcApi)
-
----
-
-## 📷 Screenshots
-
-### Android Auto Lyrics Display
-<div align="center">
-<img src="screenshots/%5BEN%5DAndroidAuto_Player.png" alt="Android Auto Player" width="600">
-</div>
-
-### Mobile App Main Screen
-<div align="center">
-<img src="screenshots/%5BEN%5DMain.jpg" alt="Main Screen" width="400">
-<img src="screenshots/%5BEN%5DSettings.jpg" alt="Settings" width="400">
-</div>
-
-### Lyrics Manager
-<div align="center">
-<img src="screenshots/%5BEN%5DLyricsManager.jpg" alt="Lyrics Manager" width="400">
-<img src="screenshots/%5BEN%5DLyricsEditor.jpg" alt="Lyrics Editor" width="400">
-</div>
-
----
-
-Feel free to submit issues or feature requests!
+Distributed under [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for attribution and modifications.

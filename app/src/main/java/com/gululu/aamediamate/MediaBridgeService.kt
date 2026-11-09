@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 package com.gululu.aamediamate
 
 import android.os.Bundle
@@ -38,7 +39,7 @@ class MediaBridgeService : MediaBrowserServiceCompat() {
         instance = this
         DiagnosticLogger.info(this, DiagnosticModule.MEDIA, "Media browser service started")
 
-        MediaBridgeSessionManager.init(this)
+        MediaBridgeSessionManager.acquire(this, this, renderLyrics = true)
         lastSettingsSignature = SettingsManager.playbackSettingsSignature(this)
         SettingsManager.addChangeListener(this, settingsListener)
 
@@ -51,11 +52,13 @@ class MediaBridgeService : MediaBrowserServiceCompat() {
         }
 
         Log.d("MediaBridge", "MediaBrowserServiceCompat started")
+        AndroidAutoPlayback.start(this)
+        AndroidAutoPlayback.setBridgeReady(true)
     }
     
     override fun onDestroy() {
         super.onDestroy()
-        MediaBridgeSessionManager.release()
+        MediaBridgeSessionManager.release(this)
         SettingsManager.removeChangeListener(this, settingsListener)
         instance = null
     }
@@ -66,6 +69,8 @@ class MediaBridgeService : MediaBrowserServiceCompat() {
         rootHints: Bundle?
     ): BrowserRoot? {
         if (!MediaClientValidator.isTrusted(this, clientPackageName, clientUid)) return null
+        DiagnosticLogger.info(this, DiagnosticModule.MEDIA, "Media browser client connected",
+            mapOf("package" to clientPackageName))
         return BrowserRoot(ROOT_ID, null)
     }
 
@@ -107,6 +112,19 @@ class MediaBridgeService : MediaBrowserServiceCompat() {
                 MediaBrowserCompat.MediaItem(description, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
             }
         }.toMutableList()
+
+        // Keep a playable Spotify entry even when its app was stopped or its session expired.
+        if (items.isEmpty() && SettingsManager.getSpotifySourceLock(context) &&
+            Global.packageAllowed(context, SettingsManager.SPOTIFY_PACKAGE) && SpotifyPlaybackStarter.isAvailable(context)) {
+            items.add(MediaBrowserCompat.MediaItem(
+                MediaDescriptionCompat.Builder()
+                    .setMediaId(SettingsManager.SPOTIFY_PACKAGE)
+                    .setTitle("Spotify")
+                    .setSubtitle(getString(R.string.spotify_start_playback))
+                    .build(),
+                MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
+            ))
+        }
 
         if (items.isEmpty()) {
             MediaBridgeSessionManager.showBrowserError(getString(R.string.no_active_media_car))

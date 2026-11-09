@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="long_lyrics_two_rows">长歌词分两行显示</string>
+    <string name="long_lyrics_two_rows_description">每行约 12 个汉字，第二行优先显示当前句的后半段。超长句先停留再按歌词时长翻页，不横向滚动。</string>
+    <string name="spotify_source_lock">锁定 Spotify 播放源</string>
+    <string name="car_auto_play">连接 Android Auto 后自动播放</string>
+    <string name="car_auto_play_description">车机连接且 Music Auto 就绪后，自动续播一次。手动暂停后不再自动续播，直到下次连接。</string>
+    <string name="spotify_start_playback">启动或继续播放 Spotify</string>
+    <string name="spotify_start_failed">请先在手机打开 Spotify 并播放一首歌，然后回到 Music Auto。</string>
+    <string name="spotify_source_lock_description">仅跟踪 Spotify，暂停时也不切换来源。此模式不受“忽略原生应用”影响。请先在手机 Spotify 播放音乐。车机显示哪个播放器仍由 Android Auto 决定。</string>
+</resources>

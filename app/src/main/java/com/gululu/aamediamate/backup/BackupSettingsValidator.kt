@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 package com.gululu.aamediamate.backup
 
 import org.json.JSONArray
@@ -5,7 +6,7 @@ import org.json.JSONObject
 
 /** Validates a complete import before any preference is changed. */
 internal object BackupSettingsValidator {
-    private val booleans = setOf("lyrics_enabled", "simplify_chinese", "ignore_native_auto_apps",
+    private val booleans = setOf("lyrics_enabled", "simplify_chinese", "ignore_native_auto_apps", "spotify_source_lock", "car_auto_play", "long_lyrics_two_rows",
         "combine_app_icon_and_album_art", "show_album_name", "show_next_lyric_line", "show_source_app")
     private val strings = setOf("lrc_api_uri", "language_pref", "api_key", "lrc_api_auth_token")
     private val arrays = setOf("bridged_apps", "lyrics_providers", "lyrics_cleanup_rules")

@@ -1,5 +1,6 @@
+<!-- Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md. -->
 <resources>
-    <string name="app_name">AAMediaMate</string>
+    <string name="app_name">Music Auto</string>
     <string name="unknown_app">未知應用</string>
 
     <!-- Settings Screen -->
@@ -88,7 +89,7 @@
     <string name="show_source_app_subtitle">在車載螢幕上顯示「From [應用程式]」</string>
 
     <!-- Main Screen -->
-    <string name="app_title">AA Media Mate</string>
+    <string name="app_title">Music Auto</string>
     <string name="settings">設定</string>
     <string name="no_media_playing">目前沒有播放任何媒體</string>
     <string name="edit_current_lyrics">編輯目前歌詞</string>

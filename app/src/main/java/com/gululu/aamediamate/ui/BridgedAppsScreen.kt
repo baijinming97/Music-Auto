@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 @file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.gululu.aamediamate.ui
@@ -117,7 +118,12 @@ private fun BridgedAppItem(
     val context = LocalContext.current
     val isNative = remember(app.packageName) { Global.isAndroidAutoApp(context, app.packageName) }
     val ignoreNative = remember { SettingsManager.getIgnoreNativeAutoApps(context) }
-    val forcedDisabled = isNative && ignoreNative
+    val spotifySourceLock = remember { SettingsManager.getSpotifySourceLock(context) }
+    val forcedDisabled = if (spotifySourceLock) {
+        app.packageName != SettingsManager.SPOTIFY_PACKAGE
+    } else {
+        isNative && ignoreNative
+    }
     
     Card(
         modifier = Modifier

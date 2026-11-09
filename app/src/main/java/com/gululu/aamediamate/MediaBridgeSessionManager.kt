@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 package com.gululu.aamediamate
 
 import android.content.Context
@@ -15,6 +16,15 @@ import com.gululu.aamediamate.models.MediaInfo
 import kotlin.math.abs
 
 object MediaBridgeSessionManager {
+    private val serviceOwners = mutableMapOf<Any, Boolean>()
+    private var carConnected = false
+
+    internal fun setCarConnected(connected: Boolean) {
+        if (carConnected == connected) return
+        carConnected = connected
+        if (!connected && serviceOwners.values.none { it }) lyricDisplayManager?.stop()
+        requestRefresh("Car projection state changed", 0L)
+    }
     private var mediaSession: MediaSessionCompat? = null
     private var mediaStateUpdater: MediaStateUpdater? = null
     private var lyricDisplayManager: LyricDisplayManager? = null
@@ -92,6 +102,31 @@ object MediaBridgeSessionManager {
         updateFromMediaInfo(MediaInformationRetriever.refreshCurrentMediaInfo(ctx))
     }
 
+    /** A connected notification listener keeps the resumable session alive between car binds. */
+    fun acquire(context: Context, owner: Any, renderLyrics: Boolean) {
+        serviceOwners[owner] = renderLyrics
+        init(context)
+        AndroidAutoPlayback.setBridgeReady(true)
+        DiagnosticLogger.info(context, DiagnosticModule.MEDIA, "Bridge session owner attached",
+            mapOf("owners" to serviceOwners.size, "renderLyrics" to renderLyrics))
+        requestRefresh("Bridge session owner attached", 0L)
+    }
+
+    /** Releases only the departing service; the remaining service still owns the same token. */
+    fun release(owner: Any) {
+        if (serviceOwners.remove(owner) == null) return
+        if (serviceOwners.isEmpty()) {
+            release()
+        } else {
+            if (!carConnected && serviceOwners.values.none { it }) lyricDisplayManager?.stop()
+            context?.let {
+                DiagnosticLogger.info(it, DiagnosticModule.MEDIA, "Bridge session retained for reconnect",
+                    mapOf("owners" to serviceOwners.size))
+            }
+            requestRefresh("Bridge owner detached", 0L)
+        }
+    }
+
     fun init(context: Context) {
         if (mediaSession != null) return
 
@@ -106,7 +141,7 @@ object MediaBridgeSessionManager {
                 MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
                         MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
             )
-            isActive = true
+            isActive = false
         }
 
         mediaStateUpdater?.clear(mediaSession!!)
@@ -132,11 +167,13 @@ object MediaBridgeSessionManager {
             }
             cancelPendingMediaRefreshes()
             stopObservingSourceController()
+            MediaControllerManager.clearSelection()
             clearStalePositionOverride()
             mediaStateUpdater?.clear(session)
             lyricDisplayManager?.stop()
             mediaInfoListener?.invoke(null)
             currentMediaInfo = null // Ensure we don't hold onto disallowed info
+            session.isActive = false
             browserErrorActive = false
             MediaBridgeService.refreshBrowserData()
             return
@@ -171,7 +208,13 @@ object MediaBridgeSessionManager {
             lyricDisplayManager?.stop()
         }
         mediaStateUpdater?.update(session, normalizedInfo)
-        lyricDisplayManager?.start(session, normalizedInfo)
+        session.isActive = true
+        // Keep resumable metadata outside the car without running lyric timers/wake locks.
+        if (carConnected || serviceOwners.isEmpty() || serviceOwners.values.any { it }) {
+            lyricDisplayManager?.start(session, normalizedInfo)
+        } else {
+            lyricDisplayManager?.stop()
+        }
 
         mediaInfoListener?.invoke(normalizedInfo)
         scheduleEndOfMediaRefresh(normalizedInfo)
@@ -180,8 +223,12 @@ object MediaBridgeSessionManager {
 
     /** Ends the service-owned session and cancels every callback and lyric task. */
     fun release() {
+        serviceOwners.clear()
+        AndroidAutoPlayback.setBridgeReady(false)
+        SpotifyPlaybackStarter.release()
         cancelPendingMediaRefreshes()
         stopObservingSourceController()
+        MediaControllerManager.clearSelection()
         clearStalePositionOverride()
         lyricDisplayManager?.close()
         lyricDisplayManager = null

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="long_lyrics_two_rows">Long lyrics on two rows</string>
+    <string name="long_lyrics_two_rows_description">Use both rows for the current lyric (about 12 CJK characters per row). Longer lyrics pause before changing pages within the lyric timing. No horizontal scrolling.</string>
+    <string name="spotify_test_app_name" translatable="false">Music Auto</string>
+    <string name="spotify_source_lock">Lock source to Spotify</string>
+    <string name="car_auto_play">Resume Spotify when Android Auto connects</string>
+    <string name="car_auto_play_description">Once the car connects and Music Auto is ready, resume Spotify once. Pausing will keep it paused until the next connection.</string>
+    <string name="spotify_start_playback">Start or resume Spotify</string>
+    <string name="spotify_start_failed">Open Spotify on your phone and start a song, then select Music Auto again.</string>
+    <string name="spotify_source_lock_description">Follow only Spotify, including while paused. The native-player filter does not apply in this mode. Start playback in Spotify on your phone first. Android Auto still chooses which player is shown.</string>
+</resources>

@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 package com.gululu.aamediamate
 
 import android.content.ComponentName
@@ -46,9 +47,15 @@ class MediaBridgeMediaCallback internal constructor(
 
     override fun onPlay() {
         if (!MediaBridgeSessionManager.isControllerTrusted()) return
+        AndroidAutoPlayback.onTransportRequest()
         Log.d("MediaBridge", "▶️ onPlay triggered")
         DiagnosticLogger.info(context, DiagnosticModule.MEDIA, "Play requested")
-        MediaControllerManager.getActiveController(context)?.transportControls?.play()
+        val controller = MediaControllerManager.getActiveController(context)
+        if (controller != null) {
+            requestPlayback(controller)
+        } else if (SettingsManager.getSpotifySourceLock(context)) {
+            SpotifyPlaybackStarter.play(context)
+        }
         sync()
     }
 
@@ -61,6 +68,8 @@ class MediaBridgeMediaCallback internal constructor(
 
     override fun onPause() {
         if (!MediaBridgeSessionManager.isControllerTrusted()) return
+        AndroidAutoPlayback.onTransportRequest()
+        SpotifyPlaybackStarter.release()
         Log.d("MediaBridge", "⏸️ onPause triggered")
         DiagnosticLogger.info(context, DiagnosticModule.MEDIA, "Pause requested")
         MediaControllerManager.getActiveController(context)?.transportControls?.pause()
@@ -124,6 +133,7 @@ class MediaBridgeMediaCallback internal constructor(
 
     override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
         if (!MediaBridgeSessionManager.isControllerTrusted()) return
+        AndroidAutoPlayback.onTransportRequest()
         Log.d("MediaBridge", "onPlayFromMediaId: $mediaId")
         DiagnosticLogger.info(context, DiagnosticModule.MEDIA, "Play from media id requested", mapOf("mediaId" to mediaId))
 
@@ -139,6 +149,8 @@ class MediaBridgeMediaCallback internal constructor(
             }
             requestPlayback(controller)
             sync()
+        } else if (mediaId == SettingsManager.SPOTIFY_PACKAGE) {
+            SpotifyPlaybackStarter.play(context)
         }
     }
 

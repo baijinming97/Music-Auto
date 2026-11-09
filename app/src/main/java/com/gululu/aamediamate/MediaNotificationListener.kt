@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 package com.gululu.aamediamate
 
 import android.app.Notification
@@ -10,12 +11,20 @@ import com.gululu.aamediamate.diagnostics.DiagnosticModule
 class MediaNotificationListener : NotificationListenerService() {
     override fun onListenerConnected() {
         super.onListenerConnected()
+        AndroidAutoPlayback.start(this)
+        MediaBridgeSessionManager.acquire(this, this, renderLyrics = false)
         MediaBridgeSessionManager.requestRefresh("Notification listener connected")
     }
 
     override fun onListenerDisconnected() {
         MediaBridgeSessionManager.updateFromMediaInfo(null)
+        MediaBridgeSessionManager.release(this)
         super.onListenerDisconnected()
+    }
+
+    override fun onDestroy() {
+        MediaBridgeSessionManager.release(this)
+        super.onDestroy()
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {

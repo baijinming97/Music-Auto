@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 @file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.gululu.aamediamate.ui
@@ -39,6 +40,8 @@ fun SettingsScreen(
     val context = LocalContext.current
 
     var ignoreNativeAutoApps by remember { mutableStateOf(SettingsManager.getIgnoreNativeAutoApps(context)) }
+    var spotifySourceLock by remember { mutableStateOf(SettingsManager.getSpotifySourceLock(context)) }
+    var carAutoPlay by remember { mutableStateOf(SettingsManager.getCarAutoPlay(context)) }
 
     val languageOptions = listOf(
         LanguageOption.SYSTEM,
@@ -120,11 +123,41 @@ fun SettingsScreen(
                 }
             }
 
-            // Ignore native Android Auto apps
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.spotify_source_lock), modifier = Modifier.weight(1f))
+                    Switch(
+                        checked = spotifySourceLock,
+                        onCheckedChange = {
+                            spotifySourceLock = it
+                            SettingsManager.setSpotifySourceLock(context, it)
+                        }
+                    )
+                }
+                Text(stringResource(R.string.spotify_source_lock_description), style = MaterialTheme.typography.bodySmall)
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.car_auto_play), modifier = Modifier.weight(1f))
+                    Switch(
+                        checked = carAutoPlay,
+                        enabled = spotifySourceLock,
+                        onCheckedChange = {
+                            carAutoPlay = it
+                            SettingsManager.setCarAutoPlay(context, it)
+                        }
+                    )
+                }
+                Text(stringResource(R.string.car_auto_play_description), style = MaterialTheme.typography.bodySmall)
+            }
+
+            // The native-player filter is inactive while Spotify is explicitly selected.
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = stringResource(id = R.string.ignore_auto_supported_apps), modifier = Modifier.weight(1f))
                 Switch(
-                    checked = ignoreNativeAutoApps,
+                    checked = ignoreNativeAutoApps && !spotifySourceLock,
+                    enabled = !spotifySourceLock,
                     onCheckedChange = {
                         ignoreNativeAutoApps = it
                         SettingsManager.setIgnoreNativeAutoApps(context, it)

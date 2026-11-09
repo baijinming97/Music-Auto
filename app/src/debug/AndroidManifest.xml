@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application android:label="@string/spotify_test_app_name" tools:replace="android:label">
+        <service android:name="com.gululu.aamediamate.MediaNotificationListener"
+            android:label="@string/spotify_test_app_name" tools:replace="android:label" />
+    </application>
+</manifest>

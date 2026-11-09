@@ -1,7 +1,9 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 @file:OptIn(ExperimentalMaterial3Api::class)
 package com.gululu.aamediamate
 
 import android.content.Context
+import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Build
@@ -130,8 +132,8 @@ fun hasNotificationAccess(context: Context): Boolean {
         "enabled_notification_listeners"
     ) ?: return false
 
-    val packageName = context.packageName
-    return enabledPackages.contains(packageName)
+    val listener = ComponentName(context, MediaNotificationListener::class.java)
+    return enabledPackages.split(':').any { ComponentName.unflattenFromString(it) == listener }
 }
 
 fun openNotificationAccessSettings(context: Context) {
@@ -280,7 +282,15 @@ fun MainScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.app_title), color = RightTextColor) },
+                title = {
+                    Column {
+                        Text(stringResource(R.string.app_title), color = RightTextColor)
+                        val version = remember(context) {
+                            context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty()
+                        }
+                        Text(version, color = RightTextColor, style = MaterialTheme.typography.labelSmall)
+                    }
+                },
                 actions = {
                     IconButton(onClick = { expanded = true }) {
                         Icon(Icons.Default.MoreVert, contentDescription = "Menu", tint = RightTextColor)

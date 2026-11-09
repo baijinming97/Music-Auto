@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 package com.gululu.aamediamate
 
 import android.content.Context
@@ -18,6 +19,11 @@ object SettingsManager {
     private const val KEY_API_KEY = "api_key"
     private const val KEY_SIMPLIFY = "simplify_chinese"
     private const val KEY_IGNORE_NATIVE_AUTO_APPS = "ignore_native_auto_apps"
+    private const val KEY_SPOTIFY_SOURCE_LOCK = "spotify_source_lock"
+    private const val KEY_CAR_AUTO_PLAY = "car_auto_play"
+    private const val KEY_LONG_LYRICS_TWO_ROWS = "long_lyrics_two_rows"
+
+    const val SPOTIFY_PACKAGE = "com.spotify.music"
     private const val KEY_LRC_API_URI = "lrc_api_uri"
     private const val KEY_LRC_API_AUTH_TOKEN = "lrc_api_auth_token"
     private const val KEY_LANGUAGE = "language_pref"
@@ -39,6 +45,9 @@ object SettingsManager {
             put(KEY_LYRICS_ENABLED, getLyricsEnabled(context))
             put(KEY_SIMPLIFY, getSimplifyEnabled(context))
             put(KEY_IGNORE_NATIVE_AUTO_APPS, getIgnoreNativeAutoApps(context))
+            put(KEY_SPOTIFY_SOURCE_LOCK, getSpotifySourceLock(context))
+            put(KEY_CAR_AUTO_PLAY, getCarAutoPlay(context))
+            put(KEY_LONG_LYRICS_TWO_ROWS, getLongLyricsTwoRows(context))
             put(KEY_LRC_API_URI, getLrcApiBaseUri(context))
             put(KEY_LANGUAGE, getLanguagePreference(context))
             put(KEY_BRIDGED_APPS, prefs.getJSONArrayString(KEY_BRIDGED_APPS))
@@ -64,6 +73,9 @@ object SettingsManager {
             settings.optBooleanOrNull(KEY_LYRICS_ENABLED)?.let { putBoolean(KEY_LYRICS_ENABLED, it) }
             settings.optBooleanOrNull(KEY_SIMPLIFY)?.let { putBoolean(KEY_SIMPLIFY, it) }
             settings.optBooleanOrNull(KEY_IGNORE_NATIVE_AUTO_APPS)?.let { putBoolean(KEY_IGNORE_NATIVE_AUTO_APPS, it) }
+            settings.optBooleanOrNull(KEY_SPOTIFY_SOURCE_LOCK)?.let { putBoolean(KEY_SPOTIFY_SOURCE_LOCK, it) }
+            settings.optBooleanOrNull(KEY_CAR_AUTO_PLAY)?.let { putBoolean(KEY_CAR_AUTO_PLAY, it) }
+            settings.optBooleanOrNull(KEY_LONG_LYRICS_TWO_ROWS)?.let { putBoolean(KEY_LONG_LYRICS_TWO_ROWS, it) }
             settings.optStringOrNull(KEY_LRC_API_URI)?.let { putString(KEY_LRC_API_URI, it) }
             settings.optStringOrNull(KEY_LANGUAGE)?.let { putString(KEY_LANGUAGE, it) }
             settings.optJSONArrayStringOrNull(KEY_BRIDGED_APPS)?.let { putString(KEY_BRIDGED_APPS, it) }
@@ -206,6 +218,29 @@ object SettingsManager {
 
     fun setIgnoreNativeAutoApps(context: Context, enabled: Boolean) {
         getPrefs(context).edit() { putBoolean(KEY_IGNORE_NATIVE_AUTO_APPS, enabled) }
+    }
+
+    /** This test build follows Spotify only unless the user explicitly restores automatic selection. */
+    fun getSpotifySourceLock(context: Context): Boolean =
+        getPrefs(context).getBoolean(KEY_SPOTIFY_SOURCE_LOCK, true)
+
+    fun setSpotifySourceLock(context: Context, enabled: Boolean) {
+        getPrefs(context).edit { putBoolean(KEY_SPOTIFY_SOURCE_LOCK, enabled) }
+    }
+
+    /** Enabled for this personal build at the user's request. */
+    fun getCarAutoPlay(context: Context): Boolean =
+        getPrefs(context).getBoolean(KEY_CAR_AUTO_PLAY, true)
+
+    fun getLongLyricsTwoRows(context: Context): Boolean =
+        getPrefs(context).getBoolean(KEY_LONG_LYRICS_TWO_ROWS, true)
+
+    fun setLongLyricsTwoRows(context: Context, enabled: Boolean) {
+        getPrefs(context).edit { putBoolean(KEY_LONG_LYRICS_TWO_ROWS, enabled) }
+    }
+
+    fun setCarAutoPlay(context: Context, enabled: Boolean) {
+        getPrefs(context).edit { putBoolean(KEY_CAR_AUTO_PLAY, enabled) }
     }
 
 

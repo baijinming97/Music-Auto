@@ -1,0 +1,22 @@
+Music Auto
+
+Based on AAMediaMate by gululu1235 and its contributors:
+https://github.com/gululu1235/AAMediaMate
+Fork base: 288cca9b54891a250b3d1a7f8717ff8b73b22da6 (upstream v1.4.5).
+
+Music Auto modifications, 2026, maintained by baijinming97:
+Spotify-specific source selection and startup, connection auto-resume,
+shared bridge-session ownership, two-row lyric pagination, permission
+checks, naming, tests, and documentation. See CHANGELOG.md and Git history.
+Modified upstream source files carry a Music Auto modification notice.
+
+Upstream acknowledgments retained from its README:
+ChatGPT and Claude Code assisted with the original app and README;
+Gemini assisted with the original logo.
+Spotify Lyrics via RapidAPI:
+https://rapidapi.com/nguyenmanhict-MuTUtGWD7K/api/spotify-web-api3
+LrcApi by HisAtri: https://github.com/HisAtri/LrcApi
+
+The Apache License, Version 2.0 is included in LICENSE. Existing upstream
+attribution is retained. This notice does not alter the license or imply
+endorsement by the upstream project, Spotify, or Google.

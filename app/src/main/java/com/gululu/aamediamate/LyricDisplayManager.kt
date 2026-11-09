@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 package com.gululu.aamediamate
 
 import android.content.Context
@@ -8,6 +9,7 @@ import androidx.annotation.MainThread
 import com.gululu.aamediamate.diagnostics.DiagnosticLogger
 import com.gululu.aamediamate.diagnostics.DiagnosticModule
 import com.gululu.aamediamate.lyrics.LyricCache
+import com.gululu.aamediamate.lyrics.CarLyricLayout
 import com.gululu.aamediamate.lyrics.LyricSyncEngine
 import com.gululu.aamediamate.lyrics.LyricsRepository
 import kotlinx.coroutines.*
@@ -55,8 +57,11 @@ class LyricDisplayManager(
                     val remaining = ((lyrics.last().timeSec * 1000 - position).coerceAtLeast(0f) / info.playbackSpeed).toLong()
                     acquire((remaining + 60_000).coerceIn(60_000, 6 * 60 * 60_000))
                 }
+                val displayLyrics = if (SettingsManager.getLongLyricsTwoRows(context)) {
+                    CarLyricLayout.timeline(lyrics, info.duration, info.playbackSpeed)
+                } else lyrics
                 LyricSyncEngine.sync(
-                    lyrics, position, SettingsManager.getLyricsTimingOffset(context).toLong(), info.playbackSpeed
+                    displayLyrics, position, SettingsManager.getLyricsTimingOffset(context).toLong(), info.playbackSpeed
                 ) { line, nextLine ->
                     if (requestGeneration == generation) updateLyricLine(mediaSession, info, line, nextLine)
                 }
@@ -106,10 +111,13 @@ class LyricDisplayManager(
 
         if (lyricLine.isNotBlank()) {
             // When a lyric is displayed, use the lyric as the title
-            metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, lyricLine)
+            val rows = lyricLine.split('\n', limit = 2)
+            metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, rows.first())
 
-            val artistText = if (showNextLyricLine) {
-                nextLyricLine?.takeIf { it.isNotBlank() } ?: buildSongInfoText(originalInfo, showAlbumName)
+            val artistText = if (rows.size > 1) {
+                rows[1]
+            } else if (showNextLyricLine) {
+                nextLyricLine?.substringBefore('\n')?.takeIf { it.isNotBlank() } ?: buildSongInfoText(originalInfo, showAlbumName)
             } else {
                 buildSongInfoText(originalInfo, showAlbumName)
             }

@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 package com.gululu.aamediamate.ui
 
 import androidx.activity.compose.BackHandler
@@ -29,6 +30,7 @@ fun DisplaySettingsScreen(onBack: () -> Unit) {
     var showAlbumName by remember { mutableStateOf(SettingsManager.getShowAlbumName(context)) }
     var showNextLyricLine by remember { mutableStateOf(SettingsManager.getShowNextLyricLine(context)) }
     var showSourceApp by remember { mutableStateOf(SettingsManager.getShowSourceApp(context)) }
+    var longLyricsTwoRows by remember { mutableStateOf(SettingsManager.getLongLyricsTwoRows(context)) }
 
     Scaffold(
         topBar = {
@@ -138,6 +140,19 @@ fun DisplaySettingsScreen(onBack: () -> Unit) {
                 )
             }
 
+            HorizontalDivider()
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.long_lyrics_two_rows), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.long_lyrics_two_rows_description), style = MaterialTheme.typography.bodyMedium)
+                }
+                Switch(checked = longLyricsTwoRows, onCheckedChange = {
+                    longLyricsTwoRows = it
+                    SettingsManager.setLongLyricsTwoRows(context, it)
+                    MediaBridgeSessionManager.refreshCurrentSession(forceLyricsResync = true)
+                })
+            }
             HorizontalDivider()
 
             // Show Next Lyric Line Toggle

@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 package com.gululu.aamediamate
 
 import android.content.Context
@@ -7,6 +8,17 @@ import android.util.Log
 object Global
 {
     fun packageAllowed(context: Context, packageName:String): Boolean {
+        // Never bridge another installation of this bridge back into itself.
+        if (packageName == context.packageName || packageName == "com.gululu.aamediamate" ||
+            packageName == "com.gululu.aamediamate.dev") return false
+
+        // A source lock includes Spotify even when the global native-player filter is enabled.
+        // Explicit per-app control opt-outs still take precedence.
+        if (SettingsManager.getSpotifySourceLock(context)) {
+            return packageName == SettingsManager.SPOTIFY_PACKAGE &&
+                SettingsManager.isAppHeadUnitControlEnabled(context, packageName)
+        }
+
         // 1. Check Global Override for Native AA Apps
         if (SettingsManager.getIgnoreNativeAutoApps(context) && isAndroidAutoApp(context, packageName)) {
             return false

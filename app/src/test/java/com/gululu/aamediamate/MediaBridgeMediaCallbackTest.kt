@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 package com.gululu.aamediamate
 
 import android.content.Context
@@ -39,6 +40,7 @@ class MediaBridgeMediaCallbackTest {
         mockkObject(MediaInformationRetriever)
         mockkObject(MediaBridgeSessionManager)
         mockkObject(DiagnosticLogger)
+        mockkObject(SpotifyPlaybackStarter)
 
         every { MediaBridgeSessionManager.isControllerTrusted() } returns true
         every { controller.packageName } returns SOURCE_PACKAGE
@@ -48,10 +50,12 @@ class MediaBridgeMediaCallbackTest {
         } returns mediaInfo
         every { MediaBridgeSessionManager.updateFromMediaInfo(mediaInfo) } returns Unit
         every { DiagnosticLogger.info(context, any(), any(), any(), any()) } returns Unit
+        every { SpotifyPlaybackStarter.play(context) } returns Unit
     }
 
     @After
     fun tearDown() {
+        unmockkObject(SpotifyPlaybackStarter)
         unmockkObject(DiagnosticLogger)
         unmockkObject(MediaBridgeSessionManager)
         unmockkObject(MediaInformationRetriever)
@@ -79,6 +83,42 @@ class MediaBridgeMediaCallbackTest {
         callback.onPlayFromMediaId(SOURCE_PACKAGE, null)
         verify(exactly = 0) { MediaBridgeSessionManager.updateFromMediaInfo(any()) }
         org.junit.Assert.assertFalse(called)
+    }
+
+    @Test
+    fun `Spotify selection can start the player when no media session exists`() {
+        every { MediaControllerManager.getAllControllers(context) } returns emptyList()
+        MediaBridgeMediaCallback(context).onPlayFromMediaId(SettingsManager.SPOTIFY_PACKAGE, null)
+        verify(exactly = 1) { SpotifyPlaybackStarter.play(context) }
+    }
+
+    @Test
+    fun `untrusted callers cannot start Spotify through the fallback`() {
+        every { MediaBridgeSessionManager.isControllerTrusted() } returns false
+        MediaBridgeMediaCallback(context).onPlayFromMediaId(SettingsManager.SPOTIFY_PACKAGE, null)
+        verify(exactly = 0) { SpotifyPlaybackStarter.play(any()) }
+    }
+
+    @Test
+    fun `automatic play resumes the currently bridged Spotify session`() {
+        every { MediaControllerManager.getActiveController(context) } returns controller
+        var resumed: MediaController? = null
+        MediaBridgeMediaCallback(context) { resumed = it }.onPlay()
+        assertSame(controller, resumed)
+        verify(exactly = 0) { SpotifyPlaybackStarter.play(any()) }
+    }
+
+    @Test
+    fun `automatic play starts Spotify when its media session is missing`() {
+        mockkObject(SettingsManager)
+        try {
+            every { SettingsManager.getSpotifySourceLock(context) } returns true
+            every { MediaControllerManager.getActiveController(context) } returns null
+            MediaBridgeMediaCallback(context).onPlay()
+            verify(exactly = 1) { SpotifyPlaybackStarter.play(context) }
+        } finally {
+            unmockkObject(SettingsManager)
+        }
     }
 
     private companion object {

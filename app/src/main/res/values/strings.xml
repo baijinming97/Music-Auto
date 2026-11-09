@@ -1,5 +1,6 @@
+<!-- Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md. -->
 <resources>
-    <string name="app_name">AAMediaMate</string>
+    <string name="app_name">Music Auto</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>
@@ -87,7 +88,7 @@
     <string name="show_source_app_subtitle">Show “From [app]” on the car display</string>
 
     <!-- Main Screen -->
-    <string name="app_title">AA Media Mate</string>
+    <string name="app_title">Music Auto</string>
     <string name="settings">Settings</string>
     <string name="no_media_playing">No media is currently playing</string>
     <string name="edit_current_lyrics">Edit current lyrics</string>

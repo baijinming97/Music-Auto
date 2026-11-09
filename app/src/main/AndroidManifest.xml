@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
@@ -7,6 +8,8 @@
     <uses-permission android:name="com.android.vending.BILLING" />
 
     <queries>
+        <provider android:authorities="androidx.car.app.connection" />
+        <package android:name="com.spotify.music" />
         <package android:name="com.google.android.projection.gearhead" />
         <intent>
             <action android:name="android.intent.action.MAIN" />

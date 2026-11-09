@@ -1,3 +1,4 @@
+// Modified for Music Auto (2026-11-10); see NOTICE and CHANGELOG.md.
 package com.gululu.aamediamate
 
 import android.content.Context
@@ -46,6 +47,27 @@ class LyricDisplayManagerTest {
         )
         method.isAccessible = true
         method.invoke(manager, mediaSession, info, lyricLine, nextLyricLine)
+    }
+
+    @Test
+    fun `current lyric continuation takes priority over next lyric or song details`() {
+        every { prefs.getBoolean("show_next_lyric_line", false) } returns true
+        val info = MediaInfo("com.music.app", "Music", "Song", "Artist", "Album", 60_000, 0, true, null, null)
+        invokeUpdateLyricLine(info, "当前句的前半段\n当前句的后半段", "下一句")
+        val metadata = slot<MediaMetadataCompat>()
+        verify { mediaSession.setMetadata(capture(metadata)) }
+        assertEquals("当前句的前半段", metadata.captured.getString(MediaMetadataCompat.METADATA_KEY_TITLE))
+        assertEquals("当前句的后半段", metadata.captured.getString(MediaMetadataCompat.METADATA_KEY_ARTIST))
+    }
+
+    @Test
+    fun `next lyric preview uses only its first display row`() {
+        every { prefs.getBoolean("show_next_lyric_line", false) } returns true
+        val info = MediaInfo("com.music.app", "Music", "Song", "Artist", "Album", 60_000, 0, true, null, null)
+        invokeUpdateLyricLine(info, "短句", "下一句前半段\n下一句后半段")
+        val metadata = slot<MediaMetadataCompat>()
+        verify { mediaSession.setMetadata(capture(metadata)) }
+        assertEquals("下一句前半段", metadata.captured.getString(MediaMetadataCompat.METADATA_KEY_ARTIST))
     }
 
     @Test

@@ -1,5 +1,6 @@
 # Gradle files
 .gradle/
+.kotlin/
 build/
 
 # Local configuration
@@ -44,3 +45,11 @@ google-services.json
 .idea/render.experimental.xml
 
 nul
+
+# Music Auto local diagnostics and private release material (2026-11-10)
+MUSIC_AUTO_NOTES.txt
+release-local/
+*.jsonl
+*.p12
+*.pfx
+*.pem
